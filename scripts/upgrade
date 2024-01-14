@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# STANDARD UPGRADE STEPS
+#=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Stopping systemd service '$app'..." --weight=5
+
+ynh_systemd_action --service_name=$app --action="stop"
+
+#=================================================
+# NODE ENVIRONMENT
+#=================================================
+ynh_script_progression --message="Create and setup environment..." --weight=45
+
+# Download, check integrity, uncompress "[resources.sources.main]" archive:
+ynh_setup_source --dest_dir="$install_dir"
+
+myynh_setup_node_environment
+
+#=================================================
+# SETUP SYSTEMD
+#=================================================
+ynh_script_progression --message="Configuring systemd service '$app'..." --weight=5
+
+ynh_add_systemd_config --service=$app --template="systemd.service"
+
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# SECURE FILES AND DIRECTORIES
+#=================================================
+ynh_script_progression --message="Set file permissions..."
+myynh_fix_file_permissions
+
+#=================================================
+# Start the app server via systemd
+#=================================================
+ynh_script_progression --message="Starting systemd service '$app'..." --weight=5
+
+yunohost service add $app
+ynh_systemd_action --service_name=$app --action="start"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Upgrade of $app completed" --last

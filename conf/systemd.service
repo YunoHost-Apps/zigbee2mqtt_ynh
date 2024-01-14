@@ -1,0 +1,29 @@
+[Unit]
+Description=zigbee2mqtt
+After=network.target
+
+[Service]
+# https://www.zigbee2mqtt.io/guide/configuration/#configuration
+# Overwrite ./data/configuration.yaml
+Environment="ZIGBEE2MQTT_CONFIG_FRONTEND_HOST=127.0.0.1"
+Environment="ZIGBEE2MQTT_CONFIG_FRONTEND_PORT=__PORT__"
+Environment="ZIGBEE2MQTT_CONFIG_SERIAL_PORT=__SERIAL_PORT__"
+
+# Set YunoHost settings:
+Environment="__YNH_NODE_LOAD_PATH__"
+
+User=__APP__
+Group=__APP__
+
+# __INSTALL_DIR__ == $install_dir == /var/www/$app/
+WorkingDirectory=__INSTALL_DIR__/
+
+# https://www.zigbee2mqtt.io/guide/installation/01_linux.html#optional-running-as-a-daemon-with-systemctl
+ExecStart=/bin/sh -c ' npm start'
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=__APP__-server
+
+[Install]
+WantedBy=multi-user.target
